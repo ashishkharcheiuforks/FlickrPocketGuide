@@ -39,7 +39,7 @@ class LocationService : Service() {
                 for (location in locationResult.locations) {
                     if (location == null) return
                     Location.distanceBetween(wayLatitude, wayLongitude, location.latitude, location.longitude, results)
-                    if (results[0] > 0) {
+                    if (results[0] >= 0) {
                         wayLatitude = location.latitude
                         wayLongitude = location.longitude
                         broadcastLocation(location)
@@ -74,7 +74,6 @@ class LocationService : Service() {
 
     companion object {
         const val ARG_LOCATION = "location"
-        const val ARG_IS_RUNNING = "isRunning"
     }
 
 }

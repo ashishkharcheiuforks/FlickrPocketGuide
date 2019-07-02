@@ -1,7 +1,5 @@
 package com.piotrek1543.example.flickrpocketguide.ui.utils
 
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AlertDialog
 import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
@@ -9,6 +7,8 @@ import android.content.IntentSender
 import android.location.LocationManager
 import android.util.Log
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
@@ -83,7 +83,8 @@ class GpsUtils(private val context: Context) {
             .setCancelable(false)
             .setPositiveButton(android.R.string.yes) { dialog, _ ->
                 dialog.dismiss()
-                context.startActivity(Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                val intent = Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                (context as AppCompatActivity).startActivityForResult(intent, Constants.GPS_REQUEST)
             }
             .setNegativeButton(android.R.string.no) { dialog, _ -> dialog.cancel() }
         val alert = builder.create()

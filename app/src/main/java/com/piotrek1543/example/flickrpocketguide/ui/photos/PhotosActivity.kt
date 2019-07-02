@@ -10,7 +10,6 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -26,6 +25,7 @@ import com.piotrek1543.example.flickrpocketguide.R
 import com.piotrek1543.example.flickrpocketguide.ui.service.LocationService
 import com.piotrek1543.example.flickrpocketguide.ui.utils.GpsUtils
 import kotlinx.android.synthetic.main.activity_main.*
+import timber.log.Timber
 
 
 class PhotosActivity : AppCompatActivity() {
@@ -121,14 +121,14 @@ class PhotosActivity : AppCompatActivity() {
         } else {
             val serviceIntent = Intent(this, LocationService::class.java)
             ContextCompat.startForegroundService(this, serviceIntent)
-            isRunningData.value = true
+            isRunningData.postValue(true)
         }
     }
 
     private fun stopService() {
         val serviceIntent = Intent(this, LocationService::class.java)
         stopService(serviceIntent)
-        isRunningData.value = false
+        isRunningData.postValue(false)
     }
 
     private val trackingServiceReceiver = object : BroadcastReceiver() {
@@ -148,13 +148,13 @@ class PhotosActivity : AppCompatActivity() {
                 val isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
 
                 if (isGpsEnabled) {
-                    Log.i(
+                    Timber.i(
                         this.javaClass.name,
                         "gpsStateChangeReceiver.onReceive() location is enabled : isGpsEnabled = $isGpsEnabled"
                     )
                     isGPSEnabled.value = true
                 } else {
-                    Log.w(this.javaClass.name, "gpsStateChangeReceiver.onReceive() location disabled ")
+                    Timber.w(this.javaClass.name, "gpsStateChangeReceiver.onReceive() location disabled ")
                     isGPSEnabled.value = false
                 }
             }
@@ -183,11 +183,8 @@ class PhotosActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == RESULT_OK) {
-            if (requestCode == Constants.GPS_REQUEST) {
-                isGPSEnabled.value = true // flag maintain before get location
-            }
+        if (requestCode == Constants.GPS_REQUEST) {
+            isGPSEnabled.postValue(true) // flag maintain before get location
         }
-
     }
 }
