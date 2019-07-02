@@ -1,7 +1,7 @@
 package com.piotrek1543.example.flickrpocketguide.utils
 
-import android.app.Activity
-import android.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AlertDialog
 import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
@@ -36,15 +36,17 @@ class GpsUtils(private val context: Context) {
         builder.setAlwaysShow(true)
     }
 
+    fun isProviderEnabled() = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+
     // method for turn on GPS
     fun turnGPSOn(cxt: Context = context) {
 
-        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+        if (!isProviderEnabled()) {
             buildAlertMessageNoGps(cxt)
         } else {
             mSettingsClient
                 .checkLocationSettings(mLocationSettingsRequest)
-                .addOnSuccessListener(context as Activity) {
+                .addOnSuccessListener(context as AppCompatActivity) {
                     //  GPS is already enable, callback GPS status through listener
                     Timber.d("GPS is already enabled")
                 }

@@ -15,7 +15,7 @@ class TrackingService : Service() {
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
     private lateinit var locationRequest: LocationRequest
-    private val stringBuilder = StringBuilder()
+    private val locations = arrayListOf<String>()
     private var wayLatitude = 0.0
     private var wayLongitude = 0.0
 
@@ -41,11 +41,8 @@ class TrackingService : Service() {
                     if (location != null) {
                         wayLatitude = location.latitude
                         wayLongitude = location.longitude
-                        stringBuilder.append(wayLatitude)
-                        stringBuilder.append("-")
-                        stringBuilder.append(wayLongitude)
-                        stringBuilder.append("\n\n")
-                        broadcastLocation(stringBuilder.toString())
+                        locations.add("$wayLatitude $wayLongitude")
+                        broadcastLocation(locations)
                     }
                 }
             }
@@ -77,7 +74,7 @@ class TrackingService : Service() {
         sendBroadcast(intent)
     }
 
-    private fun broadcastLocation(locations: String) {
+    private fun broadcastLocation(locations: ArrayList<String>) {
         val i = Intent(TrackingActivity.ACTION_TRACKING)
         i.putExtra(ARG_LOCATIONS, locations)
         sendBroadcast(i)

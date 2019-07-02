@@ -2,7 +2,6 @@ package com.piotrek1543.example.flickrpocketguide.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -29,6 +28,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class TrackingActivity : AppCompatActivity() {
 
+    private lateinit var adapter: LocationAdapter
     private lateinit var gpsUtils: GpsUtils
     private var menuItem: MenuItem? = null
     private var isGPSEnabled = MutableLiveData<Boolean>()
@@ -44,6 +44,9 @@ class TrackingActivity : AppCompatActivity() {
         isGPSEnabled.observe(this, Observer {
             if (it) startService() else stopService()
         })
+
+        adapter = LocationAdapter(context = this@TrackingActivity)
+        recycler_locations.adapter = adapter
     }
 
     override fun onResume() {
@@ -61,10 +64,9 @@ class TrackingActivity : AppCompatActivity() {
         val id = item.itemId
         if (id == R.id.action_track_activity) {
             val isRunning = isRunningData.value ?: false
-            when {
-                isGPSEnabled.value != true -> gpsUtils.turnGPSOn()
-                else -> if (isRunning) stopService() else startService()
-            }
+            val isGPSEnabled = isGPSEnabled.value ?: gpsUtils.isProviderEnabled()
+
+            if (!isGPSEnabled) gpsUtils.turnGPSOn() else if (isRunning) stopService() else startService()
         }
         return super.onOptionsItemSelected(item)
     }
@@ -74,12 +76,6 @@ class TrackingActivity : AppCompatActivity() {
         menuItem = menu.findItem(R.id.action_track_activity)
 
         return true
-    }
-
-    override fun onPause() {
-        super.onPause()
-        //unregisterReceiver(trackingServiceReceiver)
-        //unregisterReceiver(gpsStateChangeReceiver)
     }
 
     override fun onDestroy() {
@@ -115,8 +111,9 @@ class TrackingActivity : AppCompatActivity() {
 
     private val trackingServiceReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            val locations = intent.getStringExtra(TrackingService.ARG_LOCATIONS) ?: ""
-            text_hello.text = locations
+            val locations = intent.getStringArrayListExtra(TrackingService.ARG_LOCATIONS) ?: arrayListOf()
+            adapter.items = locations
+            adapter.notifyDataSetChanged()
 
             val isServiceRunning = intent.getBooleanExtra(TrackingService.ARG_IS_RUNNING, true)
             val stringId =
@@ -129,7 +126,6 @@ class TrackingActivity : AppCompatActivity() {
 
     private val gpsStateChangeReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-
 
             if (LocationManager.PROVIDERS_CHANGED_ACTION == intent.action) {
                 // Make an action or refresh an already managed state.
@@ -164,7 +160,7 @@ class TrackingActivity : AppCompatActivity() {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     isGPSEnabled.value = true
                 } else {
-                    Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.warning_permission_denied), Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -173,7 +169,7 @@ class TrackingActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK) {
+        if (resultCode == AppCompatActivity.RESULT_OK) {
             if (requestCode == Constants.GPS_REQUEST) {
                 isGPSEnabled.value = true // flag maintain before get location
             }
