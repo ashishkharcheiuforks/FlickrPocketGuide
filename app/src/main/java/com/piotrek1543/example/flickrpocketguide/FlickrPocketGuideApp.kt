@@ -1,6 +1,7 @@
 package com.piotrek1543.example.flickrpocketguide
 
 import android.app.Application
+import com.piotrek1543.example.flickrpocketguide.utils.NotificationUtils
 import timber.log.Timber
 
 

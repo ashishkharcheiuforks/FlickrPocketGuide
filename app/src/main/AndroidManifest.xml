@@ -3,6 +3,8 @@
           xmlns:tools="http://schemas.android.com/tools" package="com.piotrek1543.example.flickrpocketguide">
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 
     <application
             android:name=".FlickrPocketGuideApp"
@@ -13,7 +15,9 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
             tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".ui.TrackingActivity">
+        <activity
+                android:name=".ui.TrackingActivity"
+                android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -21,6 +25,7 @@
             </intent-filter>
         </activity>
         <service android:name=".service.TrackingService"/>
+
     </application>
 
 </manifest>

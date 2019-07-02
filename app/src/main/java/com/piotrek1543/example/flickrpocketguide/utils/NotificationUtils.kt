@@ -1,4 +1,4 @@
-package com.piotrek1543.example.flickrpocketguide
+package com.piotrek1543.example.flickrpocketguide.utils
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import com.piotrek1543.example.flickrpocketguide.R
 import com.piotrek1543.example.flickrpocketguide.ui.TrackingActivity
 
 object NotificationUtils {
@@ -21,15 +22,15 @@ object NotificationUtils {
             )
 
             val manager = context.getSystemService(NotificationManager::class.java)
-            manager!!.createNotificationChannel(serviceChannel)
+            manager?.createNotificationChannel(serviceChannel)
         }
     }
 
     internal fun createNotification(context: Context): Notification? {
         val notificationIntent = Intent(context, TrackingActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0)
-
         val resources = context.resources
+
         return NotificationCompat.Builder(context, TRACKING_CHANNEL_ID)
             .setContentTitle(resources.getString(R.string.currently_tracking_activity))
             .setContentText(resources.getString(R.string.tap_to_see_details))

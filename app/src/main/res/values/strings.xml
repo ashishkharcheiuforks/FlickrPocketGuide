@@ -4,4 +4,6 @@
     <string name="action_track_stop">Stop</string>
     <string name="currently_tracking_activity">Currently tracking activity</string>
     <string name="tap_to_see_details">Tap to see details</string>
+    <string name="warning_gps_disabled">GPS disabled</string>
+    <string name="alert_gps_disabled">Your GPS seems to be disabled, do you want to enable it?</string>
 </resources>
