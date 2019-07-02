@@ -1,4 +1,4 @@
-package com.piotrek1543.example.flickrpocketguide.utils
+package com.piotrek1543.example.flickrpocketguide.ui.utils
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -9,7 +9,7 @@ import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.piotrek1543.example.flickrpocketguide.R
-import com.piotrek1543.example.flickrpocketguide.ui.TrackingActivity
+import com.piotrek1543.example.flickrpocketguide.ui.photos.PhotosActivity
 
 object NotificationUtils {
 
@@ -27,7 +27,7 @@ object NotificationUtils {
     }
 
     internal fun createNotification(context: Context): Notification? {
-        val notificationIntent = Intent(context, TrackingActivity::class.java)
+        val notificationIntent = Intent(context, PhotosActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0)
         val resources = context.resources
 

@@ -1,4 +1,4 @@
-package com.piotrek1543.example.flickrpocketguide.ui
+package com.piotrek1543.example.flickrpocketguide.ui.photos
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.location.Location
 import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
@@ -19,16 +20,18 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.piotrek1543.example.flickrpocketguide.Constants
 import com.piotrek1543.example.flickrpocketguide.R
-import com.piotrek1543.example.flickrpocketguide.service.TrackingService
-import com.piotrek1543.example.flickrpocketguide.utils.GpsUtils
+import com.piotrek1543.example.flickrpocketguide.ui.service.LocationService
+import com.piotrek1543.example.flickrpocketguide.ui.utils.GpsUtils
 import kotlinx.android.synthetic.main.activity_main.*
 
 
-class TrackingActivity : AppCompatActivity() {
+class PhotosActivity : AppCompatActivity() {
 
-    private lateinit var adapter: LocationAdapter
+    private lateinit var photosViewModel: PhotosViewModel
+    private lateinit var adapter: PhotosAdapter
     private lateinit var gpsUtils: GpsUtils
     private var menuItem: MenuItem? = null
     private var isGPSEnabled = MutableLiveData<Boolean>()
@@ -39,14 +42,20 @@ class TrackingActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         title = ""
 
-        gpsUtils = GpsUtils(this)
+        photosViewModel = ViewModelProviders.of(this).get(PhotosViewModel::class.java)
 
+        gpsUtils = GpsUtils(this)
         isGPSEnabled.observe(this, Observer {
             if (it) startService() else stopService()
         })
 
-        adapter = LocationAdapter(context = this@TrackingActivity)
+        adapter = PhotosAdapter(context = this@PhotosActivity)
         recycler_locations.adapter = adapter
+
+        photosViewModel.photosLiveData.observe(this, Observer {
+            adapter.items = it
+            adapter.notifyDataSetChanged()
+        })
     }
 
     override fun onResume() {
@@ -78,6 +87,12 @@ class TrackingActivity : AppCompatActivity() {
         return true
     }
 
+    override fun onPause() {
+        super.onPause()
+        unregisterReceiver(gpsStateChangeReceiver)
+        unregisterReceiver(trackingServiceReceiver)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         stopService()
@@ -85,39 +100,37 @@ class TrackingActivity : AppCompatActivity() {
 
     private fun startService() {
         if (ActivityCompat.checkSelfPermission(
-                this@TrackingActivity,
+                this@PhotosActivity,
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this@TrackingActivity,
+                this@PhotosActivity,
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             ActivityCompat.requestPermissions(
-                this@TrackingActivity,
+                this@PhotosActivity,
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
                 Constants.LOCATION_REQUEST
             )
 
         } else {
-            val serviceIntent = Intent(this, TrackingService::class.java)
+            val serviceIntent = Intent(this, LocationService::class.java)
             ContextCompat.startForegroundService(this, serviceIntent)
         }
     }
 
     private fun stopService() {
-        val serviceIntent = Intent(this, TrackingService::class.java)
+        val serviceIntent = Intent(this, LocationService::class.java)
         stopService(serviceIntent)
     }
 
     private val trackingServiceReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            val locations = intent.getStringArrayListExtra(TrackingService.ARG_LOCATIONS) ?: arrayListOf()
-            adapter.items = locations
-            adapter.notifyDataSetChanged()
+            val location = intent.getParcelableExtra<Location>(LocationService.ARG_LOCATION) ?: return
+            photosViewModel.fetchPhotos(lat = location.latitude, lon = location.longitude)
 
-            val isServiceRunning = intent.getBooleanExtra(TrackingService.ARG_IS_RUNNING, true)
-            val stringId =
-                if (isServiceRunning) R.string.action_track_stop else R.string.action_track_start
+            val isServiceRunning = intent.getBooleanExtra(LocationService.ARG_IS_RUNNING, true)
+            val stringId = if (isServiceRunning) R.string.action_track_stop else R.string.action_track_start
 
             menuItem?.title = resources.getString(stringId)
             isRunningData.value = isServiceRunning
@@ -169,7 +182,7 @@ class TrackingActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == AppCompatActivity.RESULT_OK) {
+        if (resultCode == RESULT_OK) {
             if (requestCode == Constants.GPS_REQUEST) {
                 isGPSEnabled.value = true // flag maintain before get location
             }

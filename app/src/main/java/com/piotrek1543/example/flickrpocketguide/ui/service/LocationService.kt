@@ -1,23 +1,24 @@
-package com.piotrek1543.example.flickrpocketguide.service
+package com.piotrek1543.example.flickrpocketguide.ui.service
 
 import android.annotation.SuppressLint
 import android.app.Service
 import android.content.Intent
+import android.location.Location
 import android.os.IBinder
 import androidx.annotation.Nullable
 import com.google.android.gms.location.*
-import com.piotrek1543.example.flickrpocketguide.ui.TrackingActivity
-import com.piotrek1543.example.flickrpocketguide.utils.NotificationUtils
+import com.piotrek1543.example.flickrpocketguide.ui.photos.PhotosActivity
+import com.piotrek1543.example.flickrpocketguide.ui.utils.NotificationUtils
 
 
-class TrackingService : Service() {
+class LocationService : Service() {
 
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
     private lateinit var locationRequest: LocationRequest
-    private val locations = arrayListOf<String>()
     private var wayLatitude = 0.0
     private var wayLongitude = 0.0
+    private var results = FloatArray(2)
 
     @SuppressLint("MissingPermission")
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
@@ -34,15 +35,15 @@ class TrackingService : Service() {
 
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
-                if (locationResult == null) {
-                    return
-                }
+                if (locationResult == null) return
+
                 for (location in locationResult.locations) {
-                    if (location != null) {
+                    if (location == null) return
+                    Location.distanceBetween(wayLatitude, wayLongitude, location.latitude, location.longitude, results)
+                    if (results[0] > 0) {
                         wayLatitude = location.latitude
                         wayLongitude = location.longitude
-                        locations.add("$wayLatitude $wayLongitude")
-                        broadcastLocation(locations)
+                        broadcastLocation(location)
                     }
                 }
             }
@@ -69,19 +70,19 @@ class TrackingService : Service() {
     }
 
     private fun broadcastStatus(isRunning: Boolean) {
-        val intent = Intent(TrackingActivity.ACTION_TRACKING)
+        val intent = Intent(PhotosActivity.ACTION_TRACKING)
         intent.putExtra(ARG_IS_RUNNING, isRunning)
         sendBroadcast(intent)
     }
 
-    private fun broadcastLocation(locations: ArrayList<String>) {
-        val i = Intent(TrackingActivity.ACTION_TRACKING)
-        i.putExtra(ARG_LOCATIONS, locations)
+    private fun broadcastLocation(location: Location) {
+        val i = Intent(PhotosActivity.ACTION_TRACKING)
+        i.putExtra(ARG_LOCATION, location)
         sendBroadcast(i)
     }
 
     companion object {
-        const val ARG_LOCATIONS = "locations"
+        const val ARG_LOCATION = "location"
         const val ARG_IS_RUNNING = "isRunning"
     }
 

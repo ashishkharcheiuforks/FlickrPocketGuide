@@ -1,4 +1,4 @@
-package com.piotrek1543.example.flickrpocketguide.utils
+package com.piotrek1543.example.flickrpocketguide.ui.utils
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AlertDialog
