@@ -24,7 +24,6 @@ class LocationService : Service() {
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         val notification = NotificationUtils.createNotification(this.applicationContext)
         startForeground(1, notification)
-        broadcastStatus(true)
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
@@ -59,26 +58,18 @@ class LocationService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        broadcastStatus(false)
         mFusedLocationClient.removeLocationUpdates(locationCallback)
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        broadcastStatus(false)
         mFusedLocationClient.removeLocationUpdates(locationCallback)
     }
 
-    private fun broadcastStatus(isRunning: Boolean) {
-        val intent = Intent(PhotosActivity.ACTION_TRACKING)
-        intent.putExtra(ARG_IS_RUNNING, isRunning)
-        sendBroadcast(intent)
-    }
-
     private fun broadcastLocation(location: Location) {
-        val i = Intent(PhotosActivity.ACTION_TRACKING)
-        i.putExtra(ARG_LOCATION, location)
-        sendBroadcast(i)
+        val intent = Intent(PhotosActivity.ACTION_TRACKING)
+        intent.putExtra(ARG_LOCATION, location)
+        sendBroadcast(intent)
     }
 
     companion object {

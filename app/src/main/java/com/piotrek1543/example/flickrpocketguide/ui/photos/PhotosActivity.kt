@@ -52,6 +52,11 @@ class PhotosActivity : AppCompatActivity() {
         adapter = PhotosAdapter(context = this@PhotosActivity)
         recycler_locations.adapter = adapter
 
+        isRunningData.observe(this, Observer { isServiceRunning ->
+            val stringId = if (isServiceRunning) R.string.action_track_stop else R.string.action_track_start
+            menuItem?.title = resources.getString(stringId)
+        })
+
         photosViewModel.photosLiveData.observe(this, Observer {
             adapter.items = it
             adapter.notifyDataSetChanged()
@@ -116,24 +121,20 @@ class PhotosActivity : AppCompatActivity() {
         } else {
             val serviceIntent = Intent(this, LocationService::class.java)
             ContextCompat.startForegroundService(this, serviceIntent)
+            isRunningData.value = true
         }
     }
 
     private fun stopService() {
         val serviceIntent = Intent(this, LocationService::class.java)
         stopService(serviceIntent)
+        isRunningData.value = false
     }
 
     private val trackingServiceReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val location = intent.getParcelableExtra<Location>(LocationService.ARG_LOCATION) ?: return
             photosViewModel.fetchPhotos(lat = location.latitude, lon = location.longitude)
-
-            val isServiceRunning = intent.getBooleanExtra(LocationService.ARG_IS_RUNNING, true)
-            val stringId = if (isServiceRunning) R.string.action_track_stop else R.string.action_track_start
-
-            menuItem?.title = resources.getString(stringId)
-            isRunningData.value = isServiceRunning
         }
     }
 
