@@ -92,14 +92,10 @@ class PhotosActivity : AppCompatActivity() {
         return true
     }
 
-    override fun onPause() {
-        super.onPause()
-        unregisterReceiver(gpsStateChangeReceiver)
-        unregisterReceiver(trackingServiceReceiver)
-    }
-
     override fun onDestroy() {
         super.onDestroy()
+        unregisterReceiver(gpsStateChangeReceiver)
+        unregisterReceiver(trackingServiceReceiver)
         stopService()
     }
 
