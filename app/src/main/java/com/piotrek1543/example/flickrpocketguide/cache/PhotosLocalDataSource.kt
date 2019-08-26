@@ -47,8 +47,7 @@ class PhotosLocalDataSource internal constructor(
     override suspend fun getPhotos(): Result<List<PhotoEntity>> = withContext(ioDispatcher) {
         return@withContext try {
             val photos = photosDao.getPhotos()
-            val mapped = photos.map { mapper.mapFromCached(it) }
-            Result.Success(mapped)
+            Result.Success(photos.map { mapper.mapFromCached(it) })
         } catch (e: Exception) {
             Result.Error(e)
         }

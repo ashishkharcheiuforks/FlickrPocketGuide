@@ -45,20 +45,26 @@ class PhotosActivity : AppCompatActivity() {
         title = ""
 
         photosViewModel = obtainViewModel(PhotosViewModel::class.java)
-        receiverManager = ReceiverManager.init(this)
+        val activity = this@PhotosActivity
+        receiverManager = ReceiverManager.init(activity)
 
-        gpsUtils = GpsUtils(this)
-        isGPSEnabled.observe(this, Observer {
+        gpsUtils = GpsUtils(activity)
+        isGPSEnabled.observe(activity, Observer {
             if (it) startService() else stopService()
         })
 
-        adapter = PhotosAdapter(context = this@PhotosActivity)
+        adapter = PhotosAdapter(context = activity)
         recycler_locations.adapter = adapter
 
-        photosViewModel.photosLiveData.observe(this, Observer {
-            adapter.items = it
-            adapter.notifyDataSetChanged()
-        })
+        with(photosViewModel) {
+            photosLiveData.observe(activity, Observer {
+                adapter.items = it
+                adapter.notifyDataSetChanged()
+            })
+            errorLiveData.observe(activity, Observer {
+                Toast.makeText(activity, it.localizedMessage, Toast.LENGTH_LONG).show()
+            })
+        }
     }
 
     override fun onResume() {
@@ -182,5 +188,11 @@ class PhotosActivity : AppCompatActivity() {
             if (LocationService::class.java.name == service.service.className) return true
         }
         return false
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        photosViewModel.cancelAllRequests()
+        receiverManager.unregisterReceiver(trackingServiceReceiver)
     }
 }

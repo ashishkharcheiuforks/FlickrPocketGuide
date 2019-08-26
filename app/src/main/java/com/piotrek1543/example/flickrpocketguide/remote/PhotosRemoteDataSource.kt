@@ -7,6 +7,7 @@ import com.piotrek1543.example.flickrpocketguide.remote.mapper.RemotePhotoEntity
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 class PhotosRemoteDataSource internal constructor(
     private val api: FlickrApi = ApiProvider.flickrApi,
@@ -36,17 +37,21 @@ class PhotosRemoteDataSource internal constructor(
 
     override suspend fun getPhotosByLocation(lat: Double, lon: Double): Result<List<PhotoEntity>> =
         withContext(ioDispatcher) {
-            val call = api.search(lat = lat, lon = lon)
+            try {
 
-            if (call.isSuccessful) {
-                return@withContext Result.Success(call.body()?.photos?.photo?.map {
-                    mapper.mapFromRemote(
-                        it
-                    )
-                } ?: emptyList())
-            } else {
-                return@withContext Result.Error(Exception(call.message()))
+                val call = api.search(lat = lat, lon = lon)
 
+                if (call.isSuccessful) {
+                    val list = call.body()?.photos?.photo
+                    return@withContext Result.Success(list?.map {
+                        mapper.mapFromRemote(it)
+                    } ?: emptyList())
+                } else {
+                    Timber.e(call.message())
+                    return@withContext Result.Error(Exception(call.message()))
+                }
+            } catch (e: Exception) {
+                return@withContext Result.Error(e)
             }
         }
 
