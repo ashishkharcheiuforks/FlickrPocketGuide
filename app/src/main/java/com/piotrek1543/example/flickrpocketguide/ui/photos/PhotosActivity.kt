@@ -19,12 +19,13 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import com.piotrek1543.example.flickrpocketguide.Constants
 import com.piotrek1543.example.flickrpocketguide.R
+import com.piotrek1543.example.flickrpocketguide.presentation.photos.PhotosViewModel
+import com.piotrek1543.example.flickrpocketguide.ui.broadcast.ReceiverManager
+import com.piotrek1543.example.flickrpocketguide.ui.extensions.obtainViewModel
 import com.piotrek1543.example.flickrpocketguide.ui.service.LocationService
 import com.piotrek1543.example.flickrpocketguide.ui.utils.GpsUtils
-import com.piotrek1543.example.flickrpocketguide.ui.utils.ReceiverManager
 import kotlinx.android.synthetic.main.activity_main.*
 import timber.log.Timber
 
@@ -43,7 +44,7 @@ class PhotosActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         title = ""
 
-        photosViewModel = ViewModelProviders.of(this).get(PhotosViewModel::class.java)
+        photosViewModel = obtainViewModel(PhotosViewModel::class.java)
         receiverManager = ReceiverManager.init(this)
 
         gpsUtils = GpsUtils(this)
@@ -58,12 +59,6 @@ class PhotosActivity : AppCompatActivity() {
             adapter.items = it
             adapter.notifyDataSetChanged()
         })
-    }
-
-    private fun registerTrackingServiceReceiver() {
-        val serviceFilter = IntentFilter()
-        serviceFilter.addAction(ACTION_TRACKING)
-        registerReceiver(trackingServiceReceiver, serviceFilter)
     }
 
     override fun onResume() {
@@ -92,7 +87,8 @@ class PhotosActivity : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_track, menu)
         menuItem = menu.findItem(R.id.action_track_activity)
-        val resId = if (isLocationServiceRunning()) R.string.action_track_stop else R.string.action_track_start
+        val resId =
+            if (isLocationServiceRunning()) R.string.action_track_stop else R.string.action_track_start
         menuItem?.title = resources.getString(resId)
 
         return true
@@ -126,8 +122,14 @@ class PhotosActivity : AppCompatActivity() {
         }
     }
 
+    private fun registerTrackingServiceReceiver() {
+        val serviceFilter = IntentFilter()
+        serviceFilter.addAction(ACTION_TRACKING)
+        receiverManager.registerReceiver(trackingServiceReceiver, serviceFilter)
+    }
+
     private fun stopService() {
-        unregisterReceiver(trackingServiceReceiver)
+        receiverManager.unregisterReceiver(trackingServiceReceiver)
 
         val serviceIntent = Intent(this, LocationService::class.java)
         stopService(serviceIntent)
@@ -176,7 +178,7 @@ class PhotosActivity : AppCompatActivity() {
 
     private fun isLocationServiceRunning(): Boolean {
         val manager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-        for (service in manager!!.getRunningServices(Integer.MAX_VALUE)) {
+        for (service in manager.getRunningServices(Integer.MAX_VALUE)) {
             if (LocationService::class.java.name == service.service.className) return true
         }
         return false

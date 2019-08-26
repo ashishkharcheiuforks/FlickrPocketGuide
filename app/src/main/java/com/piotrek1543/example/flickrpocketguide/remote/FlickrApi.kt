@@ -12,7 +12,7 @@ interface FlickrApi {
         @Query("api_key") apiKey: String = "7521fa1276b19537eb2bdfdd4b119c5c",
         @Query("lat") lat: Double,
         @Query("lon") lon: Double,
-        @Query("per_page") perPage: Int = 5 //get only one image
+        @Query("per_page") perPage: Int = 30
     ): Response<PhotosModel>
 
 }

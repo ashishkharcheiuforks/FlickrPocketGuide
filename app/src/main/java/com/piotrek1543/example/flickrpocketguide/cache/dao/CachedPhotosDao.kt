@@ -35,6 +35,14 @@ interface CachedPhotosDao {
     suspend fun insertPhoto(cachedPhoto: CachedPhoto)
 
     /**
+     * Insert a list of cachedPhotos in the database. If the cachedPhoto already exists, replace it.
+     *
+     * @param list the list of cachedPhotos to be inserted.
+     */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertPhotos(list: List<CachedPhoto>)
+
+    /**
      * Update a cachedPhoto.
      *
      * @param cachedPhoto cachedPhoto to be updated
