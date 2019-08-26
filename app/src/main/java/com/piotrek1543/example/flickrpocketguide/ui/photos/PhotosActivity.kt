@@ -63,15 +63,10 @@ class PhotosActivity : AppCompatActivity() {
         })
     }
 
-    override fun onResume() {
-        super.onResume()
+    private fun registerTrackingServiceReceiver() {
         val serviceFilter = IntentFilter()
         serviceFilter.addAction(ACTION_TRACKING)
         registerReceiver(trackingServiceReceiver, serviceFilter)
-
-        val filter = IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION)
-        filter.addAction(Intent.ACTION_PROVIDER_CHANGED)
-        registerReceiver(gpsStateChangeReceiver, filter)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -92,13 +87,6 @@ class PhotosActivity : AppCompatActivity() {
         return true
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        unregisterReceiver(gpsStateChangeReceiver)
-        unregisterReceiver(trackingServiceReceiver)
-        stopService()
-    }
-
     private fun startService() {
         if (ActivityCompat.checkSelfPermission(
                 this@PhotosActivity,
@@ -115,6 +103,8 @@ class PhotosActivity : AppCompatActivity() {
             )
 
         } else {
+            registerTrackingServiceReceiver()
+
             val serviceIntent = Intent(this, LocationService::class.java)
             ContextCompat.startForegroundService(this, serviceIntent)
             isRunningData.postValue(true)
@@ -125,35 +115,13 @@ class PhotosActivity : AppCompatActivity() {
         val serviceIntent = Intent(this, LocationService::class.java)
         stopService(serviceIntent)
         isRunningData.postValue(false)
+        unregisterReceiver(trackingServiceReceiver)
     }
 
     private val trackingServiceReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val location = intent.getParcelableExtra<Location>(LocationService.ARG_LOCATION) ?: return
             photosViewModel.fetchPhotos(lat = location.latitude, lon = location.longitude)
-        }
-    }
-
-    private val gpsStateChangeReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-
-            if (LocationManager.PROVIDERS_CHANGED_ACTION == intent.action) {
-                // Make an action or refresh an already managed state.
-
-                val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-                val isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-
-                if (isGpsEnabled) {
-                    Timber.i(
-                        this.javaClass.name,
-                        "gpsStateChangeReceiver.onReceive() location is enabled : isGpsEnabled = $isGpsEnabled"
-                    )
-                    isGPSEnabled.value = true
-                } else {
-                    Timber.w(this.javaClass.name, "gpsStateChangeReceiver.onReceive() location disabled ")
-                    isGPSEnabled.value = false
-                }
-            }
         }
     }
 

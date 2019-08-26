@@ -38,12 +38,17 @@ class LocationService : Service() {
 
                 for (location in locationResult.locations) {
                     if (location == null) return
-                    Location.distanceBetween(wayLatitude, wayLongitude, location.latitude, location.longitude, results)
-                    if (results[0] >= 100) {
-                        wayLatitude = location.latitude
-                        wayLongitude = location.longitude
-                        broadcastLocation(location)
-                    }
+                    Location.distanceBetween(
+                        wayLatitude,
+                        wayLongitude,
+                        location.latitude,
+                        location.longitude,
+                        results
+                    )
+                    wayLatitude = location.latitude
+                    wayLongitude = location.longitude
+                    broadcastLocation(location)
+
                 }
             }
         }
