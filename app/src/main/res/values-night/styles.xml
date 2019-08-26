@@ -1,7 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.MaterialComponents.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.MaterialComponents">
         <!-- Customize your theme here. -->
         <item name="android:fontFamily">@font/google_sans</item>
         <item name="colorPrimary">@color/colorPrimary</item>
@@ -10,9 +11,9 @@
         <item name="toolbarStyle">@style/Widget.Toolbar</item>
         <item name="tabStyle">@style/Widget.PocketGuide.Tabs</item>
         <item name="android:textViewStyle">@style/Widget.PocketGuide.TextView</item>
-        <item name="android:windowBackground">@color/white</item>
+        <item name="android:windowBackground">?android:attr/colorBackground</item>
         <item name="android:statusBarColor">@color/status_bar</item>
-        <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
         <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
         <item name="android:textColorTertiary">@color/text_color_tertiary</item>
         <item name="android:alertDialogTheme">@style/Theme.PocketGuide.AlertDialogTheme</item>
@@ -23,18 +24,8 @@
         <item name="android:textAppearanceListItemSecondary">@style/TextAppearance.PocketGuide.ListSecondary</item>
     </style>
 
-
-    <!-- The launcher theme. It sets the main window background to the launch_screen drawable -->
-
-    <style name="AppTheme.NoActionBar" parent="AppTheme">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-    </style>
-
-    <style name="AppTheme.PopupTheme" parent="ThemeOverlay.MaterialComponents.Dark"/>
-
-    <style name="Theme.PocketGuide.AlertDialogTheme" parent="@style/Theme.MaterialComponents.Light.Dialog">
-        <item name="colorPrimary">@color/colorPrimaryDark</item>
+    <style name="Theme.PocketGuide.AlertDialogTheme" parent="@style/Theme.MaterialComponents.Dialog">
+        <item name="colorPrimary">@color/colorPrimary</item>
         <item name="textAppearanceBody1">@style/TextAppearance.PocketGuide.Dialog.Content</item>
         <item name="android:textViewStyle">@style/Widget.PocketGuide.TextView</item>
         <item name="android:windowTitleStyle">@style/TextAppearance.PocketGuide.Dialog.Title</item>
@@ -43,31 +34,25 @@
         <item name="buttonBarPositiveButtonStyle">@style/Widget.MaterialComponents.Button.Icon</item>
     </style>
 
-    <style name="TextAppearance.PocketGuide.Dialog.Title" parent="@style/TextAppearance.AppCompat.Title">
-        <item name="android:textSize">22sp</item>
-        <item name="android:fontFamily">@font/google_sans</item>
-        <item name="android:gravity">start</item>
+    <!-- The launcher theme. It sets the main window background to the launch_screen drawable -->
+
+    <style name="AppTheme.NoActionBar" parent="AppTheme">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="TextAppearance.PocketGuide.Dialog.Content" parent="@style/TextAppearance.MaterialComponents.Body1">
-        <item name="android:textSize">16sp</item>
-        <item name="android:textColor">?android:textColorSecondary</item>
-        <item name="android:gravity">start</item>
+    <style name="AppTheme.PopupTheme" parent="ThemeOverlay.MaterialComponents"/>
+
+    <style name="Widget.Toolbar" parent="Widget.MaterialComponents.Toolbar">
+        <item name="titleTextAppearance">@style/TextAppearance.PocketGuide.ToolbarTitle</item>
+        <item name="popupTheme">@style/AppTheme.PopupTheme</item>
     </style>
 
     <style name="Widget.AppBar" parent="@style/Widget.Design.AppBarLayout">
         <item name="popupTheme">@style/AppTheme.PopupTheme</item>
-        <item name="android:background">@color/white</item>
         <item name="android:elevation">8dp</item>
+        <item name="android:theme">@style/ThemeOverlay.MaterialComponents.Dark.ActionBar</item>
         <item name="android:orientation">vertical</item>
-    </style>
-
-    <style name="TextAppearance.PocketGuide.ListSecondary" parent="@style/TextAppearance.MaterialComponents.Body1">
-        <item name="android:textColor">?android:textColorSecondary</item>
-    </style>
-
-    <style name="TextAppearance.PocketGuide.Body" parent="@style/TextAppearance.MaterialComponents.Body1">
-        <item name="android:textColor">?android:textColorSecondary</item>
     </style>
 
     <style name="Widget.PocketGuide.TextView" parent="@android:style/Widget.Material.TextView">
@@ -82,38 +67,19 @@
         <item name="textAllCaps">false</item>
     </style>
 
-    <style name="Widget.PocketGuide.Tabs" parent="@style/Widget.MaterialComponents.TabLayout">
+    <style name="Widget.PocketGuide.Tabs" parent="@style/Widget.Design.TabLayout">
         <item name="tabTextAppearance">@style/TextAppearance.PocketGuide.Tab</item>
         <item name="tabIndicator">@drawable/tab_indicator</item>
-    </style>
-
-    <style name="Widget.Toolbar" parent="Widget.MaterialComponents.Toolbar">
-        <item name="titleTextAppearance">@style/TextAppearance.PocketGuide.ToolbarTitle</item>
-        <item name="popupTheme">@style/AppTheme.PopupTheme</item>
-    </style>
-
-    <style name="TextAppearance.PocketGuide.ToolbarTitle" parent="@style/TextAppearance.Widget.AppCompat.Toolbar.Title">
-        <item name="android:fontFamily">@font/google_sans</item>
+        <item name="android:theme">@style/AppTheme.PopupTheme</item>
     </style>
 
     <style name="Widget.PocketGuide.BottomNavigationView"
-        parent="@style/Widget.MaterialComponents.BottomNavigationView.Colored">
+           parent="@style/Widget.MaterialComponents.BottomNavigationView.Colored">
         <item name="itemIconTint">@color/bottom_nav_item</item>
         <item name="itemTextAppearanceActive">@style/TextAppearance.PocketGuide.BottomNavigationView.Active</item>
         <item name="itemTextAppearanceInactive">@style/TextAppearance.PocketGuide.BottomNavigationView</item>
         <item name="labelVisibilityMode">selected</item>
         <item name="android:theme">@style/ThemeOverlay.MaterialComponents.Dark</item>
     </style>
-
-    <style name="TextAppearance.PocketGuide.BottomNavigationView"
-        parent="@style/Widget.MaterialComponents.BottomNavigationView.Colored">
-        <item name="android:fontFamily">@font/google_sans</item>
-    </style>
-
-    <style name="TextAppearance.PocketGuide.BottomNavigationView.Active">
-        <item name="android:textStyle">bold</item>
-        <item name="android:textSize">14sp</item>
-    </style>
-
 
 </resources>

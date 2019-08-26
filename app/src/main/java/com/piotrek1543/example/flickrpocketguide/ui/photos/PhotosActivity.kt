@@ -27,6 +27,7 @@ import com.piotrek1543.example.flickrpocketguide.ui.extensions.obtainViewModel
 import com.piotrek1543.example.flickrpocketguide.ui.service.LocationService
 import com.piotrek1543.example.flickrpocketguide.ui.utils.GpsUtils
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.include_toolbar.*
 import timber.log.Timber
 
 
@@ -42,6 +43,7 @@ class PhotosActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        setSupportActionBar(toolbar)
         title = ""
 
         photosViewModel = obtainViewModel(PhotosViewModel::class.java)
