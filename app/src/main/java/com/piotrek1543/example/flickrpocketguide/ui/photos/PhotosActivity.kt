@@ -2,13 +2,13 @@ package com.piotrek1543.example.flickrpocketguide.ui.photos
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.ActivityManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.location.Location
-import android.location.LocationManager
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -24,18 +24,19 @@ import com.piotrek1543.example.flickrpocketguide.Constants
 import com.piotrek1543.example.flickrpocketguide.R
 import com.piotrek1543.example.flickrpocketguide.ui.service.LocationService
 import com.piotrek1543.example.flickrpocketguide.ui.utils.GpsUtils
+import com.piotrek1543.example.flickrpocketguide.ui.utils.ReceiverManager
 import kotlinx.android.synthetic.main.activity_main.*
 import timber.log.Timber
 
 
 class PhotosActivity : AppCompatActivity() {
 
+    private lateinit var receiverManager: ReceiverManager
     private lateinit var photosViewModel: PhotosViewModel
     private lateinit var adapter: PhotosAdapter
     private lateinit var gpsUtils: GpsUtils
     private var menuItem: MenuItem? = null
     private var isGPSEnabled = MutableLiveData<Boolean>()
-    private val isRunningData = MutableLiveData<Boolean>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +44,7 @@ class PhotosActivity : AppCompatActivity() {
         title = ""
 
         photosViewModel = ViewModelProviders.of(this).get(PhotosViewModel::class.java)
+        receiverManager = ReceiverManager.init(this)
 
         gpsUtils = GpsUtils(this)
         isGPSEnabled.observe(this, Observer {
@@ -51,11 +53,6 @@ class PhotosActivity : AppCompatActivity() {
 
         adapter = PhotosAdapter(context = this@PhotosActivity)
         recycler_locations.adapter = adapter
-
-        isRunningData.observe(this, Observer { isServiceRunning ->
-            val stringId = if (isServiceRunning) R.string.action_track_stop else R.string.action_track_start
-            menuItem?.title = resources.getString(stringId)
-        })
 
         photosViewModel.photosLiveData.observe(this, Observer {
             adapter.items = it
@@ -69,13 +66,25 @@ class PhotosActivity : AppCompatActivity() {
         registerReceiver(trackingServiceReceiver, serviceFilter)
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (isLocationServiceRunning()) {
+            when (receiverManager.isReceiverRegistered(trackingServiceReceiver)) {
+                true -> {
+                    Timber.d("Receiver already registered")
+                }
+                false -> registerTrackingServiceReceiver()
+            }
+        }
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val id = item.itemId
         if (id == R.id.action_track_activity) {
-            val isRunning = isRunningData.value ?: false
             val isGPSEnabled = isGPSEnabled.value ?: gpsUtils.isProviderEnabled()
 
-            if (!isGPSEnabled) gpsUtils.turnGPSOn() else if (isRunning) stopService() else startService()
+            if (!isGPSEnabled) gpsUtils.turnGPSOn()
+            else if (isLocationServiceRunning()) stopService() else startService()
         }
         return super.onOptionsItemSelected(item)
     }
@@ -83,6 +92,8 @@ class PhotosActivity : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_track, menu)
         menuItem = menu.findItem(R.id.action_track_activity)
+        val resId = if (isLocationServiceRunning()) R.string.action_track_stop else R.string.action_track_start
+        menuItem?.title = resources.getString(resId)
 
         return true
     }
@@ -98,7 +109,10 @@ class PhotosActivity : AppCompatActivity() {
         ) {
             ActivityCompat.requestPermissions(
                 this@PhotosActivity,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ),
                 Constants.LOCATION_REQUEST
             )
 
@@ -107,20 +121,24 @@ class PhotosActivity : AppCompatActivity() {
 
             val serviceIntent = Intent(this, LocationService::class.java)
             ContextCompat.startForegroundService(this, serviceIntent)
-            isRunningData.postValue(true)
+
+            menuItem?.title = resources.getString(R.string.action_track_stop)
         }
     }
 
     private fun stopService() {
+        unregisterReceiver(trackingServiceReceiver)
+
         val serviceIntent = Intent(this, LocationService::class.java)
         stopService(serviceIntent)
-        isRunningData.postValue(false)
-        unregisterReceiver(trackingServiceReceiver)
+
+        menuItem?.title = resources.getString(R.string.action_track_start)
     }
 
     private val trackingServiceReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            val location = intent.getParcelableExtra<Location>(LocationService.ARG_LOCATION) ?: return
+            val location =
+                intent.getParcelableExtra<Location>(LocationService.ARG_LOCATION) ?: return
             photosViewModel.fetchPhotos(lat = location.latitude, lon = location.longitude)
         }
     }
@@ -138,7 +156,11 @@ class PhotosActivity : AppCompatActivity() {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     isGPSEnabled.value = true
                 } else {
-                    Toast.makeText(this, getString(R.string.warning_permission_denied), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        getString(R.string.warning_permission_denied),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
@@ -150,5 +172,13 @@ class PhotosActivity : AppCompatActivity() {
         if (requestCode == Constants.GPS_REQUEST) {
             isGPSEnabled.postValue(true) // flag maintain before get location
         }
+    }
+
+    private fun isLocationServiceRunning(): Boolean {
+        val manager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        for (service in manager!!.getRunningServices(Integer.MAX_VALUE)) {
+            if (LocationService::class.java.name == service.service.className) return true
+        }
+        return false
     }
 }
