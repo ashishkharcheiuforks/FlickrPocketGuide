@@ -13,6 +13,6 @@ class Photos {
     @Json(name = "total")
     var total: String? = null
     @Json(name = "photo")
-    var photoModel: List<PhotoModel>? = null
+    var photo: List<PhotoModel>? = null
 
 }

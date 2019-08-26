@@ -17,7 +17,7 @@ class PhotosRepository(
             call = { api.search(lat = lat, lon = lon) },
             errorMessage = "Error Fetching Photos"
         )
-        val list = response?.photos?.photoModel
+        val list = response?.photos?.photo
 
         return list?.map { remoteMapper.mapFromRemote(it) }?.toMutableList()
 

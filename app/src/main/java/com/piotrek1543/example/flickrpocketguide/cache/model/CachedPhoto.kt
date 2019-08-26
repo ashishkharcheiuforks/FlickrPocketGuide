@@ -8,7 +8,7 @@ import androidx.room.PrimaryKey
 class CachedPhoto(
     @PrimaryKey(autoGenerate = false)
     @ColumnInfo(name = "id")
-    var id: String? = null,
+    var id: String,
     @ColumnInfo(name = "owner")
     var owner: String? = null,
     @ColumnInfo(name = "secret")

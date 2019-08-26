@@ -2,6 +2,7 @@ package com.piotrek1543.example.flickrpocketguide.cache.mapper
 
 import com.piotrek1543.example.flickrpocketguide.cache.model.CachedPhoto
 import com.piotrek1543.example.flickrpocketguide.data.model.PhotoEntity
+import java.util.*
 
 open class CachedPhotoEntityMapper :
     EntityMapper<CachedPhoto, PhotoEntity> {
@@ -10,7 +11,7 @@ open class CachedPhotoEntityMapper :
      * Map a [PhotoEntity] instance to a [CachedPhoto] instance
      */
     override fun mapToCached(type: PhotoEntity): CachedPhoto = CachedPhoto(
-        id = type.id,
+        id = type.id ?: UUID.randomUUID().toString(),
         owner = type.owner,
         secret = type.secret,
         server = type.server,
