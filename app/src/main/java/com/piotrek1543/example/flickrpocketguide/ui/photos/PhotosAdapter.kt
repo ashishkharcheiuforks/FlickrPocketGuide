@@ -8,13 +8,14 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.piotrek1543.example.flickrpocketguide.Constants
 import com.piotrek1543.example.flickrpocketguide.R
-import com.piotrek1543.example.flickrpocketguide.model.Photo
+import com.piotrek1543.example.flickrpocketguide.data.model.PhotoEntity
+import com.piotrek1543.example.flickrpocketguide.remote.model.PhotoModel
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.item_photo.view.*
 import timber.log.Timber
 
 class PhotosAdapter(
-    var items: List<Photo> = listOf(),
+    var items: List<PhotoEntity> = listOf(),
     private val context: Context
 ) : RecyclerView.Adapter<PhotosAdapter.ViewHolder>() {
 

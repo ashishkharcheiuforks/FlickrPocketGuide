@@ -2,9 +2,10 @@ package com.piotrek1543.example.flickrpocketguide.ui.photos
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.piotrek1543.example.flickrpocketguide.data.remote.ApiProvider
+import com.piotrek1543.example.flickrpocketguide.data.model.PhotoEntity
+import com.piotrek1543.example.flickrpocketguide.remote.ApiProvider
 import com.piotrek1543.example.flickrpocketguide.data.repository.PhotosRepository
-import com.piotrek1543.example.flickrpocketguide.model.Photo
+import com.piotrek1543.example.flickrpocketguide.remote.model.PhotoModel
 import kotlinx.coroutines.*
 import timber.log.Timber
 import kotlin.coroutines.CoroutineContext
@@ -20,7 +21,7 @@ class PhotosViewModel : ViewModel() {
 
     private val repository: PhotosRepository = PhotosRepository(ApiProvider.flickrApi)
 
-    val photosLiveData = MutableLiveData<MutableList<Photo>>().apply { value = arrayListOf() }
+    val photosLiveData = MutableLiveData<MutableList<PhotoEntity>>().apply { value = arrayListOf() }
 
     fun fetchPhotos(lat: Double = 52.40692, lon: Double = 16.92993) {
         scope.launch {

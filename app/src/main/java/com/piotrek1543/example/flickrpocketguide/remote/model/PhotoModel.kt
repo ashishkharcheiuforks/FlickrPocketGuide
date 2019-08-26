@@ -1,8 +1,8 @@
-package com.piotrek1543.example.flickrpocketguide.model
+package com.piotrek1543.example.flickrpocketguide.remote.model
 
 import com.squareup.moshi.Json
 
-class Photo {
+class PhotoModel {
     @Json(name = "id")
     var id: String? = null
     @Json(name = "owner")

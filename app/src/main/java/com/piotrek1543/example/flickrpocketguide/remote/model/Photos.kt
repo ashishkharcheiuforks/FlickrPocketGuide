@@ -1,4 +1,4 @@
-package com.piotrek1543.example.flickrpocketguide.model
+package com.piotrek1543.example.flickrpocketguide.remote.model
 
 import com.squareup.moshi.Json
 
@@ -13,6 +13,6 @@ class Photos {
     @Json(name = "total")
     var total: String? = null
     @Json(name = "photo")
-    var photo: List<Photo>? = null
+    var photoModel: List<PhotoModel>? = null
 
 }

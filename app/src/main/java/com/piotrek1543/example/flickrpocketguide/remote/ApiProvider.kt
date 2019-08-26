@@ -1,4 +1,4 @@
-package com.piotrek1543.example.flickrpocketguide.data.remote
+package com.piotrek1543.example.flickrpocketguide.remote
 
 import com.piotrek1543.example.flickrpocketguide.BuildConfig
 import com.piotrek1543.example.flickrpocketguide.Constants

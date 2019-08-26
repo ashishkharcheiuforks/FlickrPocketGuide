@@ -1,6 +1,6 @@
-package com.piotrek1543.example.flickrpocketguide.data.remote
+package com.piotrek1543.example.flickrpocketguide.remote
 
-import com.piotrek1543.example.flickrpocketguide.model.PhotosEntity
+import com.piotrek1543.example.flickrpocketguide.remote.model.PhotosModel
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -13,6 +13,6 @@ interface FlickrApi {
         @Query("lat") lat: Double,
         @Query("lon") lon: Double,
         @Query("per_page") perPage: Int = 5 //get only one image
-    ): Response<PhotosEntity>
+    ): Response<PhotosModel>
 
 }
