@@ -45,10 +45,11 @@ class LocationService : Service() {
                         location.longitude,
                         results
                     )
-                    wayLatitude = location.latitude
-                    wayLongitude = location.longitude
-                    broadcastLocation(location)
-
+                    if (results[0] >= 100) {
+                        wayLatitude = location.latitude
+                        wayLongitude = location.longitude
+                        broadcastLocation(location)
+                    }
                 }
             }
         }
