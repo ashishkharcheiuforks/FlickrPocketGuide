@@ -9,7 +9,7 @@ class PhotosRepository(private val api: FlickrApi) : BaseRepository() {
 
         val response = safeApiCall(
             call = { api.search(lat = lat, lon = lon) },
-            errorMessage = "Error Fetching Popular Movies"
+            errorMessage = "Error Fetching Photos"
         )
 
         return response?.photos?.photo?.toMutableList()

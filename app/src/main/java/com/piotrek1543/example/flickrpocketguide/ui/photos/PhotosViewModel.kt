@@ -26,9 +26,7 @@ class PhotosViewModel : ViewModel() {
         scope.launch {
             val photos = repository.getPhotos(lat = lat, lon = lon) ?: return@launch
             val list = photosLiveData.value!!
-            val element = photos.first() //only one picture
-            list.add(0, element)
-            photosLiveData.postValue(list)
+            photosLiveData.postValue(photos)
 
             Timber.d("photossssss ${list.count()}")
 
